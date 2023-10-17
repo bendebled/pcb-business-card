@@ -71,6 +71,8 @@ As it can be seen, the C3 is a good choice as we do not need more than a 802.11 
 
 ## ESP32-C3 and deepsleep
 
+https://docs.espressif.com/projects/esp-idf/en/release-v4.4/esp32c3/api-reference/system/sleep_modes.html?highlight=sleep
+
 Whereas a lot of wake up methods are available on an original ESP32: wake on timer, wake on touch, wake on ulp, wake on ext0, wake on ext1 it is not the case on the ESP32-C3. Indeed, the only possible way to wake up the ESP32-C3 is through a timer or via the pins that are powered by the RTC:
 
 ![image-20231008003130056](./microcontroller-analysis.assets/image-20231008003130056.png)
@@ -145,15 +147,17 @@ Here is a table that summarize the pin usage
 | GPIO1  | Button                                        | VDD_RTC                                                      |
 | GPIO2  | Button                                        | VDD_RTC /!\ Strapping pin                                    |
 | GPIO3  | Button                                        | VDD_RTC                                                      |
-| GPIO4  | Button                                        | VDD_RTC                                                      |
-| GPIO5  | Battery voltage input                         |                                                              |
+| GPIO4  | Screen/Temp/WS2812B ON/OFF (through 2 MOSFET) | VDD_RTC                                                      |
+| GPIO5  | Battery voltage input + USB detect            |                                                              |
 | GPIO6  | SCL                                           | /!\ Power glitches (the pin is at a low level output status during 5ns) |
 | GPIO7  | SDA                                           | /!\ Power glitches (the pin is at a low level output status during 5ns) |
 | GPIO8  |                                               | LED connected /!\ Strapping pin                              |
 | GPIO9  |                                               | Boot button /!\ Strapping pin                                |
 | GPIO10 | Buzzer (through MOSFET)                       | PWM should be on all GPIO pin /!\ Power glitches (the pin is at a low level output status during 5ns) |
 | GPIO20 | WS2812B                                       | /!\ Power glitches (the pin is at a low level output status during 5ns) |
-| GPIO21 | Screen/Temp/WS2812B ON/OFF (through 2 MOSFET) |                                                              |
+| GPIO21 |                                               |                                                              |
+|        |                                               |                                                              |
+|        |                                               |                                                              |
 
 This leaves not a lot of free pins! This is one caveat of ESP32-C3: its limited number of pins. There are different solutions if you need more IO: I2C IO expander or shift registers for the cheap way. 74HC166 and 74HC595 are good candidates. Please read this [page](https://diyi0t.com/shift-register-tutorial-for-arduino-and-esp8266/?utm_content=cmp-true) for more information.
 
