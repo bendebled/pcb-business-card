@@ -1,5 +1,5 @@
 from machine import Pin, I2C
-import mysh1106
+from display import *
 import time
 from statemachine import *
 from tetris import *
@@ -7,11 +7,15 @@ import network
 import asyncio
 from microdot_asyncio import Microdot, send_file
 from config import conf
+from resume import *
+from buttons import *
 
 
 i2c = I2C(scl=Pin(6), sda=Pin(7), freq=400000)
-oled = mysh1106.MY_SH1106_I2C(128, 64, i2c, addr=0x3c, rotate=180)
+oled = MY_SH1106_I2C(128, 64, i2c, addr=0x3c, rotate=180)
 oled.contrast(int(conf["brightness"]*2.55))
+
+buttons = Buttons()
 
 LEFT_BTN_GPIO = 0
 RIGHT_BTN_GPIO = 1
@@ -36,40 +40,16 @@ def manage_up_down_values(value, min_value, max_value):
         value += 1
     return max(min_value, min(max_value, value))
 
-def display_menu_entry(txt, pos, selected_pos):
-    if selected_pos == pos:
-        txt = "> {} <".format(txt)
-    x_pos = int((128 - len(txt)*8)/2)
-    y_pos = 15 + pos*10
-    oled.text(txt, x_pos, y_pos)
-
-def display_menu_header():
-    oled.fill_rect(0,0,128,9,1)
-
-    t = (int(time.time()/5)) % 4
-    if t == 0:
-        oled.print_small_text(str("Benoit DEBLED"), 1, 1, 1, 0)
-    elif t == 1:
-        oled.print_small_text(str("www.debled.com"), 1, 1,1,0)
-    elif t == 2:
-        oled.print_small_text("benoit@debled.com",1,1,1,0)
-    else:
-        oled.print_small_text("0487/52.44.31",1,1,1,0)
-    
-    oled.print_small_text("22",128-4*6+2,1,1,0)
-    oled.print_small_text("°C",128-2*6,1,1,0)
-
-
 def state0_logic():
     global main_menu_pos
 
     oled.fill(0)
-    display_menu_header()
-    display_menu_entry("My Resume", 0, main_menu_pos)
-    display_menu_entry("Web Server", 1, main_menu_pos)
-    display_menu_entry("Temp Logger", 2, main_menu_pos)
-    display_menu_entry("Fun", 3, main_menu_pos)
-    display_menu_entry("Settings", 4, main_menu_pos)
+    oled.display_menu_header()
+    oled.display_menu_entry("My Resume", 0, main_menu_pos)
+    oled.display_menu_entry("Web Server", 1, main_menu_pos)
+    oled.display_menu_entry("Temp Logger", 2, main_menu_pos)
+    oled.display_menu_entry("Fun", 3, main_menu_pos)
+    oled.display_menu_entry("Settings", 4, main_menu_pos)
     oled.show()
 
     main_menu_pos = manage_up_down_values(main_menu_pos, 0, 4)
@@ -85,87 +65,24 @@ def state0_logic():
     if main_menu_pos == 4 and right_btn.value() == 0:
         state_machine.force_transition_to(settings_state)
 
-def resume_logic():
-    global resume_pos
-    transition_to_state0 = False
+async def check_for_exit_state(obj):
     while True:
-        if transition_to_state0 == True:
+        if left_btn.value() == 0:
+            obj.stop()
             break
-        oled.fill(0)
-        if resume_pos == 0:
-            oled.text(str("Contacts"), 0, 0)
-            oled.print_small_text(str("Benoit Debled"), 0, 15,1, 1)
-            oled.print_small_text(str("Embedded Engineer"), 0, 25,1, 1)
-            oled.print_small_text(str("www.debled.com"), 0, 35, 1, 1)
-            oled.print_small_text(str("benoit@debled.com"), 0, 45, 1, 1)
-            oled.print_small_text(str("0487/52.44.31"), 0, 55, 1, 1)
-        elif resume_pos == 1:
-            oled.text(str("Experiences"), 0, 0)
-            oled.print_small_text(str("HMS - Jun 2018 - now"), 0, 15,1, 1)
-            oled.print_small_text(str("Developping embedded"), 0, 25,1, 1)
-            oled.print_small_text(str("industrial routers"), 0, 35,1, 1)
-            oled.print_small_text(str("Tech: C, Rust, Yocto,"), 0, 45, 1, 1)
-            oled.print_small_text(str("u-boot, kernel,"), 0, 55,1, 1)
-        elif resume_pos == 2:
-            oled.print_small_text(str("drivers, docker,"), 0, 0,1, 1)
-            oled.print_small_text(str("modem-manager,"), 0, 10,1, 1)
-            oled.print_small_text(str("UTF-8, UCS-2"), 0, 20,1, 1)
-            oled.print_small_text(str(""), 0, 55, 1, 1)
-        elif resume_pos == 3:
-            oled.print_small_text(str("Drooney-sept-nov '16"), 0, 0,1, 1)
-            oled.print_small_text(str("Conception of LoRa"), 0, 10,1, 1)
-            oled.print_small_text(str("sensor pushing data"), 0, 20,1, 1)
-            oled.print_small_text(str("to cloud."), 0, 30, 1, 1)
-            oled.print_small_text(str("Development of PCB,"), 0, 40,1, 1)
-            oled.print_small_text(str("firmware & cloud"), 0, 50,1, 1)
-        elif resume_pos == 4:
-            oled.text(str("Pers. projects"), 0, 0)
-            oled.print_small_text(str("Home automation"), 0, 15,1, 1)
-            oled.print_small_text(str("Alarm clock"), 0, 25,1, 1)
-            oled.print_small_text(str("Quadcopters"), 0, 35, 1, 1)
-        elif resume_pos == 5:
-            oled.text(str("Distinctions"), 0, 0)
-            oled.print_small_text(str("Hackathons:"), 0, 15,1, 1)
-            oled.print_small_text(str(" HackUPC"), 0, 25,1, 1)
-            oled.print_small_text(str("  2nd place"), 0, 35,1, 1)
-            oled.print_small_text(str(" Citizens of Wallonia"), 0, 45, 1, 1)
-            oled.print_small_text(str("  Jury Prize"), 0, 55, 1, 1)
-        elif resume_pos == 6:
-            oled.print_small_text(str("Inno Pepites Junior"), 0, 0,1, 1)
-            oled.print_small_text(str(" Entrepreneurship"), 0, 10,1, 1)
-            oled.print_small_text(str(" contest"), 0, 20,1, 1)
-            oled.print_small_text(str(" snapClassify:"), 0, 30, 1, 1)
-            oled.print_small_text(str(" solution to classify"), 0, 40,1, 1)
-            oled.print_small_text(str(" your photos"), 0, 50,1, 1)
-        elif resume_pos == 7:
-            oled.text(str("Education"), 0, 0)
-            oled.print_small_text(str("UMONS 2012-2017"), 0, 15,1, 1)
-            oled.print_small_text(str(" Master in"), 0, 25,1, 1)
-            oled.print_small_text(str(" Computer science"), 0, 35,1, 1)
-            oled.print_small_text(str("McCutcheon"), 0, 45, 1, 1)
-            oled.print_small_text(str("High"), 10*6+3, 45, 1, 1)
-            oled.print_small_text(str("School"), 10*6+3+4*6+3, 45, 1, 1)
-            oled.print_small_text(str(" 2011-2012 Indiana,US"), 0, 55, 1, 1)
-        elif resume_pos == 8:
-            oled.text(str("Skills"), 0, 0)
-            oled.print_small_text(str("C, Rust, Python"), 0, 15,1, 1)
-            oled.print_small_text(str("Yocto, Kernel, drivers"), 0, 25,1, 1)
-            oled.print_small_text(str("device tree, u-boot"), 0, 35, 1, 1)
-            oled.print_small_text(str("git, jenkins"), 0, 45, 1, 1)
-        oled.show()
-        while True:
-            old_resume_pos = resume_pos
-            resume_pos = manage_up_down_values(resume_pos, 0, 8)
-            if resume_pos != old_resume_pos:
-                break
-            if left_btn.value() == 0:
-                transition_to_state0 = True
-                break
+        await asyncio.sleep(0.001)
     state_machine.force_transition_to(state0)
+
+async def start_state(obj):
+    await obj.run()
+
+def resume_logic():
+    resume = Resume(oled, buttons)
+    asyncio.new_event_loop().run_until_complete(asyncio.gather(check_for_exit_state(resume), start_state(resume)))
 
 def display_oled_webserver(connected):
     oled.fill(0)
-    display_menu_header()
+    oled.display_menu_header()
     oled.print_small_text(str("Please connect to"), 0, 15, 1, 1)
     oled.print_small_text(str("SSID \"bendebled\""), 0, 25, 1, 1)
     oled.print_small_text(str("and go to"), 0, 35, 1, 1)
@@ -192,7 +109,7 @@ def web_server_logic():
         return 'Hello, world!'
     
     @app.route('/resume.pdf')
-    def resume(request):
+    def resumeroute(request):
         return send_file('resume.pdf', content_type="application/pdf")
     
     async def check_for_exit_webserver_state():
@@ -221,9 +138,9 @@ def fun_logic():
     global fun_menu_pos
 
     oled.fill(0)
-    display_menu_header()
-    display_menu_entry("Tetris", 0, fun_menu_pos)
-    display_menu_entry("Pong", 1, fun_menu_pos)
+    oled.display_menu_header()
+    oled.display_menu_entry("Tetris", 0, fun_menu_pos)
+    oled.display_menu_entry("Pong", 1, fun_menu_pos)
     oled.show()
 
     fun_menu_pos = manage_up_down_values(fun_menu_pos, 0, 1)
@@ -253,9 +170,9 @@ def settings_logic():
     global settings_menu_pos
 
     oled.fill(0)
-    display_menu_header()
-    display_menu_entry("Brightness", 0, settings_menu_pos)
-    display_menu_entry("Buzzer", 1, settings_menu_pos)
+    oled.display_menu_header()
+    oled.display_menu_entry("Brightness", 0, settings_menu_pos)
+    oled.display_menu_entry("Buzzer", 1, settings_menu_pos)
     oled.show()
 
     if down_btn.value() == 0:
@@ -295,9 +212,9 @@ def settings_logic():
         buzzer_menu_pos = 0 if conf["buzzer"] else 1
         while True:
             oled.fill(0)
-            display_menu_header()
-            display_menu_entry("On", 0, buzzer_menu_pos)
-            display_menu_entry("Off", 1, buzzer_menu_pos)
+            oled.display_menu_header()
+            oled.display_menu_entry("On", 0, buzzer_menu_pos)
+            oled.display_menu_entry("Off", 1, buzzer_menu_pos)
             oled.show()
             if down_btn.value() == 0:
                 buzzer_menu_pos -= 1

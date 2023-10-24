@@ -1,4 +1,5 @@
 import sh1106
+import time
 
 cmap = ['00000000000000000000000000000000000', #Space
         '00100001000010000100001000000000100', #!
@@ -129,3 +130,26 @@ class MY_SH1106_I2C(sh1106.SH1106_I2C):
                 xpos+=size
             xpos=origin
             ypos+=size
+
+    def display_menu_entry(self, txt, pos, selected_pos):
+        if selected_pos == pos:
+            txt = "> {} <".format(txt)
+        x_pos = int((128 - len(txt)*8)/2)
+        y_pos = 15 + pos*10
+        self.text(txt, x_pos, y_pos)
+
+    def display_menu_header(self):
+        self.fill_rect(0,0,128,9,1)
+
+        t = (int(time.time()/5)) % 4
+        if t == 0:
+            self.print_small_text(str("Benoit DEBLED"), 1, 1, 1, 0)
+        elif t == 1:
+            self.print_small_text(str("www.debled.com"), 1, 1,1,0)
+        elif t == 2:
+            self.print_small_text("benoit@debled.com",1,1,1,0)
+        else:
+            self.print_small_text("0487/52.44.31",1,1,1,0)
+        
+        self.print_small_text("22",128-4*6+2,1,1,0)
+        self.print_small_text("°C",128-2*6,1,1,0)
