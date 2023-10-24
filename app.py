@@ -6,9 +6,12 @@ from tetris import *
 import network
 import asyncio
 from microdot_asyncio import Microdot, send_file
+from config import conf
+
 
 i2c = I2C(scl=Pin(6), sda=Pin(7), freq=400000)
 oled = mysh1106.MY_SH1106_I2C(128, 64, i2c, addr=0x3c, rotate=180)
+oled.contrast(int(conf["brightness"]*2.55))
 
 LEFT_BTN_GPIO = 0
 RIGHT_BTN_GPIO = 1
@@ -23,6 +26,7 @@ down_btn = Pin(DOWN_BTN_GPIO, Pin.IN, Pin.PULL_UP)
 state_machine = StateMachine()
 main_menu_pos = 0
 fun_menu_pos = 0
+settings_menu_pos = 0
 resume_pos = 0
 
 def manage_up_down_values(value, min_value, max_value):
@@ -78,6 +82,8 @@ def state0_logic():
         state_machine.force_transition_to(temp_logger_state)
     if main_menu_pos == 3 and right_btn.value() == 0:
         state_machine.force_transition_to(fun_state)
+    if main_menu_pos == 4 and right_btn.value() == 0:
+        state_machine.force_transition_to(settings_state)
 
 def resume_logic():
     global resume_pos
@@ -243,6 +249,75 @@ def fun_pong_logic():
     if left_btn.value() == 0:
         state_machine.force_transition_to(state0)
 
+def settings_logic():
+    global settings_menu_pos
+
+    oled.fill(0)
+    display_menu_header()
+    display_menu_entry("Brightness", 0, settings_menu_pos)
+    display_menu_entry("Buzzer", 1, settings_menu_pos)
+    oled.show()
+
+    if down_btn.value() == 0:
+        settings_menu_pos -= 1
+    if up_btn.value() == 0:
+        settings_menu_pos += 1
+    if settings_menu_pos < 0:
+        settings_menu_pos = 0
+    elif settings_menu_pos > 1:
+        settings_menu_pos = 1
+
+    if settings_menu_pos == 0 and right_btn.value() == 0:
+        while True:
+            oled.fill(0)
+            oled.rect(59,0,10,64,1)
+            size = int((conf["brightness"]/100)*62)
+            oled.fill_rect(60,63-size,8,size,1)
+            oled.text(str(conf["brightness"])+"%",75,28,1)
+            oled.show()
+            if up_btn.value() == 0:
+                conf["brightness"] += 1
+                if conf["brightness"] > 100:
+                    conf["brightness"] = 100
+                oled.contrast(int(conf["brightness"]*2.55))
+            elif down_btn.value() == 0:
+                conf["brightness"] -= 1
+                if conf["brightness"] < 0:
+                    conf["brightness"] = 0
+                oled.contrast(int(conf["brightness"]*2.55))
+            if left_btn.value() == 0:
+                f = open("config.py", "w")
+                f.write("conf={}".format(str(conf)))
+                f.close()
+                time.sleep(0.1)
+                break
+    if settings_menu_pos == 1 and right_btn.value() == 0:
+        buzzer_menu_pos = 0 if conf["buzzer"] else 1
+        while True:
+            oled.fill(0)
+            display_menu_header()
+            display_menu_entry("On", 0, buzzer_menu_pos)
+            display_menu_entry("Off", 1, buzzer_menu_pos)
+            oled.show()
+            if down_btn.value() == 0:
+                buzzer_menu_pos -= 1
+            if up_btn.value() == 0:
+                buzzer_menu_pos += 1
+            if buzzer_menu_pos < 0:
+                buzzer_menu_pos = 0
+            elif buzzer_menu_pos > 1:
+                buzzer_menu_pos = 1
+            if left_btn.value() == 0:
+                conf["buzzer"] = True if buzzer_menu_pos == 0 else False
+                f = open("config.py", "w")
+                f.write("conf={}".format(str(conf)))
+                f.close()
+                time.sleep(0.1)
+                break
+
+    if left_btn.value() == 0:
+        state_machine.force_transition_to(state0)
+
 state0 = state_machine.add_state(state0_logic)
 resume_state = state_machine.add_state(resume_logic)
 web_server_state = state_machine.add_state(web_server_logic)
@@ -250,6 +325,7 @@ temp_logger_state = state_machine.add_state(temp_logger_logic)
 fun_state = state_machine.add_state(fun_logic)
 fun_tetris_state = state_machine.add_state(fun_tetris_logic)
 fun_pong_state = state_machine.add_state(fun_pong_logic)
+settings_state = state_machine.add_state(settings_logic)
 
 while True:
     state_machine.run()
