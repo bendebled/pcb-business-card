@@ -3,13 +3,11 @@ from display import *
 import time
 from statemachine import *
 from tetris import *
-import network
 import asyncio
-from microdot_asyncio import Microdot, send_file
 from config import conf
 from resume import *
 from buttons import *
-
+from webserver import *
 
 i2c = I2C(scl=Pin(6), sda=Pin(7), freq=400000)
 oled = MY_SH1106_I2C(128, 64, i2c, addr=0x3c, rotate=180)
@@ -78,52 +76,9 @@ def resume_logic():
     resume = Resume(oled, buttons)
     asyncio.new_event_loop().run_until_complete(asyncio.gather(check_for_exit_state(resume), start_state(resume)))
 
-def display_oled_webserver(connected):
-    oled.fill(0)
-    oled.display_menu_header()
-    oled.print_small_text(str("Please connect to"), 0, 15, 1, 1)
-    oled.print_small_text(str("SSID \"bendebled\""), 0, 25, 1, 1)
-    oled.print_small_text(str("and go to"), 0, 35, 1, 1)
-    oled.print_small_text(str("http://192.168.4.1"), 0, 45, 1, 1)
-    oled.print_small_text("creating AP" if not connected else "AP created", 0, 55, 1, 1)
-    oled.show()
-
 def web_server_logic():
-    display_oled_webserver(False)
-
-    ssid = 'bendebled'
-    ap = network.WLAN(network.AP_IF)
-    ap.config(essid=ssid)
-    ap.active(True)
-    while ap.active() == False:
-        pass
-    print('Connection successful')
-    display_oled_webserver(True)
-    print(ap.ifconfig())
-    app = Microdot()
-
-    @app.route('/')
-    async def index(request):
-        return 'Hello, world!'
-    
-    @app.route('/resume.pdf')
-    def resumeroute(request):
-        return send_file('resume.pdf', content_type="application/pdf")
-    
-    async def check_for_exit_webserver_state():
-        while True:
-            if left_btn.value() == 0:
-                break
-            await asyncio.sleep(0.001)
-        app.shutdown()
-        ap.active(False)
-        state_machine.force_transition_to(state0)
-
-    async def start_web_server():
-        await app.start_server(port=80, debug=True)
-
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(asyncio.gather(check_for_exit_webserver_state(), start_web_server()))
+    webserver = WebServer(oled)
+    asyncio.new_event_loop().run_until_complete(asyncio.gather(check_for_exit_state(webserver), start_state(webserver)))
 
 def temp_logger_logic():
     oled.fill(0)
