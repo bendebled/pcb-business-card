@@ -4,7 +4,6 @@ import time
 from statemachine import *
 from tetris import *
 import network
-import usocket as socket
 import asyncio
 from microdot_asyncio import Microdot, send_file
 
