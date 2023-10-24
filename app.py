@@ -30,8 +30,6 @@ down_btn = Pin(DOWN_BTN_GPIO, Pin.IN, Pin.PULL_UP)
 state_machine = StateMachine()
 main_menu_pos = 0
 fun_menu_pos = 0
-settings_menu_pos = 0
-resume_pos = 0
 
 def manage_up_down_values(value, min_value, max_value):
     if down_btn.value() == 0:
