@@ -20,6 +20,7 @@ down_btn = Pin(DOWN_BTN_GPIO, Pin.IN, Pin.PULL_UP)
 state_machine = StateMachine()
 main_menu_pos = 0
 fun_menu_pos = 0
+resume_pos = 0
 
 def manage_up_down_values(value, min_value, max_value):
     if down_btn.value() == 0:
@@ -76,11 +77,82 @@ def state0_logic():
         state_machine.force_transition_to(fun_state)
 
 def resume_logic():
-    oled.fill(0)
-    oled.text(str("resume"), 10, 35)
-    oled.show()
-    if left_btn.value() == 0:
-        state_machine.force_transition_to(state0)
+    global resume_pos
+    transition_to_state0 = False
+    while True:
+        if transition_to_state0 == True:
+            break
+        oled.fill(0)
+        if resume_pos == 0:
+            oled.text(str("Contacts"), 0, 0)
+            oled.print_small_text(str("Benoit Debled"), 0, 15,1, 1)
+            oled.print_small_text(str("Embedded Engineer"), 0, 25,1, 1)
+            oled.print_small_text(str("www.debled.com"), 0, 35, 1, 1)
+            oled.print_small_text(str("benoit@debled.com"), 0, 45, 1, 1)
+            oled.print_small_text(str("0487/52.44.31"), 0, 55, 1, 1)
+        elif resume_pos == 1:
+            oled.text(str("Experiences"), 0, 0)
+            oled.print_small_text(str("HMS - Jun 2018 - now"), 0, 15,1, 1)
+            oled.print_small_text(str("Developping embedded"), 0, 25,1, 1)
+            oled.print_small_text(str("industrial routers"), 0, 35,1, 1)
+            oled.print_small_text(str("Tech: C, Rust, Yocto,"), 0, 45, 1, 1)
+            oled.print_small_text(str("u-boot, kernel,"), 0, 55,1, 1)
+        elif resume_pos == 2:
+            oled.print_small_text(str("drivers, docker,"), 0, 0,1, 1)
+            oled.print_small_text(str("modem-manager,"), 0, 10,1, 1)
+            oled.print_small_text(str("UTF-8, UCS-2"), 0, 20,1, 1)
+            oled.print_small_text(str(""), 0, 55, 1, 1)
+        elif resume_pos == 3:
+            oled.print_small_text(str("Drooney-sept-nov '16"), 0, 0,1, 1)
+            oled.print_small_text(str("Conception of LoRa"), 0, 10,1, 1)
+            oled.print_small_text(str("sensor pushing data"), 0, 20,1, 1)
+            oled.print_small_text(str("to cloud."), 0, 30, 1, 1)
+            oled.print_small_text(str("Development of PCB,"), 0, 40,1, 1)
+            oled.print_small_text(str("firmware & cloud"), 0, 50,1, 1)
+        elif resume_pos == 4:
+            oled.text(str("Pers. projects"), 0, 0)
+            oled.print_small_text(str("Home automation"), 0, 15,1, 1)
+            oled.print_small_text(str("Alarm clock"), 0, 25,1, 1)
+            oled.print_small_text(str("Quadcopters"), 0, 35, 1, 1)
+        elif resume_pos == 5:
+            oled.text(str("Distinctions"), 0, 0)
+            oled.print_small_text(str("Hackathons:"), 0, 15,1, 1)
+            oled.print_small_text(str(" HackUPC"), 0, 25,1, 1)
+            oled.print_small_text(str("  2nd place"), 0, 35,1, 1)
+            oled.print_small_text(str(" Citizens of Wallonia"), 0, 45, 1, 1)
+            oled.print_small_text(str("  Jury Prize"), 0, 55, 1, 1)
+        elif resume_pos == 6:
+            oled.print_small_text(str("Inno Pepites Junior"), 0, 0,1, 1)
+            oled.print_small_text(str(" Entrepreneurship"), 0, 10,1, 1)
+            oled.print_small_text(str(" contest"), 0, 20,1, 1)
+            oled.print_small_text(str(" snapClassify:"), 0, 30, 1, 1)
+            oled.print_small_text(str(" solution to classify"), 0, 40,1, 1)
+            oled.print_small_text(str(" your photos"), 0, 50,1, 1)
+        elif resume_pos == 7:
+            oled.text(str("Education"), 0, 0)
+            oled.print_small_text(str("UMONS 2012-2017"), 0, 15,1, 1)
+            oled.print_small_text(str(" Master in"), 0, 25,1, 1)
+            oled.print_small_text(str(" Computer science"), 0, 35,1, 1)
+            oled.print_small_text(str("McCutcheon"), 0, 45, 1, 1)
+            oled.print_small_text(str("High"), 10*6+3, 45, 1, 1)
+            oled.print_small_text(str("School"), 10*6+3+4*6+3, 45, 1, 1)
+            oled.print_small_text(str(" 2011-2012 Indiana,US"), 0, 55, 1, 1)
+        elif resume_pos == 8:
+            oled.text(str("Skills"), 0, 0)
+            oled.print_small_text(str("C, Rust, Python"), 0, 15,1, 1)
+            oled.print_small_text(str("Yocto, Kernel, drivers"), 0, 25,1, 1)
+            oled.print_small_text(str("device tree, u-boot"), 0, 35, 1, 1)
+            oled.print_small_text(str("git, jenkins"), 0, 45, 1, 1)
+        oled.show()
+        while True:
+            old_resume_pos = resume_pos
+            resume_pos = manage_up_down_values(resume_pos, 0, 8)
+            if resume_pos != old_resume_pos:
+                break
+            if left_btn.value() == 0:
+                transition_to_state0 = True
+                break
+    state_machine.force_transition_to(state0)
 
 def web_server_logic():
     oled.fill(0)
