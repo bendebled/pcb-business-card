@@ -30,8 +30,8 @@ class WebServer:
 
         ssid = 'bendebled'
         self.ap = network.WLAN(network.AP_IF)
-        self.ap.config(essid=ssid)
         self.ap.active(True)
+        self.ap.config(essid=ssid)
         while self.ap.active() == False:
             pass
         print('Connection successful')

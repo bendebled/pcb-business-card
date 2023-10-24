@@ -96,7 +96,9 @@ cmap = ['00000000000000000000000000000000000', #Space
         '00100001000010000000001000010000100', #|
         '01000001000010000010001000010001000', #}
         '01000101010001000000000000000000000', #}~
-        '00111001010011100000000000000000000'  #°
+        '00111001010011100000000000000000000',  #°
+        '11111111111111111111111111111111111', #square for unknown symbols
+
 ]
 
 class MY_SH1106_I2C(sh1106.SH1106_I2C):
@@ -118,7 +120,8 @@ class MY_SH1106_I2C(sh1106.SH1106_I2C):
         
         index = charval-32 #start code, 32 or space
         if letter == '°':
-            index = len(cmap)-1
+            index = len(cmap)-2
+        index=min(index, len(cmap)-1)
         character = cmap[index] #this is our char...
         rows = [character[i:i+5] for i in range(0,len(character),5)]
         for row in rows:

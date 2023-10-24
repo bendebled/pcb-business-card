@@ -10,6 +10,7 @@ from resume import *
 from buttons import *
 from webserver import *
 from settings import *
+from numberfacts import *
 
 i2c = I2C(scl=Pin(6), sda=Pin(7), freq=400000)
 oled = MY_SH1106_I2C(128, 64, i2c, addr=0x3c, rotate=180)
@@ -97,7 +98,7 @@ def fun_logic():
     oled.fill(0)
     oled.display_menu_header()
     oled.display_menu_entry("Tetris", 0, fun_menu_pos)
-    oled.display_menu_entry("Pong", 1, fun_menu_pos)
+    oled.display_menu_entry("Number Facts", 1, fun_menu_pos)
     oled.show()
 
     fun_menu_pos = buttons.manage_up_down_values(fun_menu_pos, 0, 1)
@@ -105,7 +106,7 @@ def fun_logic():
     if fun_menu_pos == 0 and buttons.is_right_pressed():
         state_machine.force_transition_to(fun_tetris_state)
     if fun_menu_pos == 1 and buttons.is_right_pressed():
-        state_machine.force_transition_to(fun_pong_state)
+        state_machine.force_transition_to(fun_numbers_state)
     if buttons.is_left_pressed():
         state_machine.force_transition_to(state0)
 
@@ -120,12 +121,10 @@ def fun_tetris_logic():
     tetris = Tetris(oled, buttons)
     asyncio.new_event_loop().run_until_complete(asyncio.gather(check_left_and_right_for_exit(tetris, "Thanks for playing!"), start_state(tetris)))
 
-def fun_pong_logic():
-    oled.fill(0)
-    oled.text(str("pong"), 10, 35)
-    oled.show()
-    if buttons.is_left_pressed():
-        state_machine.force_transition_to(state0)
+def fun_numbers_logic():
+    numberfacts = NumberFacts(oled, buttons)
+    asyncio.new_event_loop().run_until_complete(asyncio.gather(check_left_for_exit(numberfacts), start_state(numberfacts)))
+
 
 def settings_logic():
     settings = Settings(oled, buttons)
@@ -138,7 +137,7 @@ web_server_state = state_machine.add_state(web_server_logic)
 temp_logger_state = state_machine.add_state(temp_logger_logic)
 fun_state = state_machine.add_state(fun_logic)
 fun_tetris_state = state_machine.add_state(fun_tetris_logic)
-fun_pong_state = state_machine.add_state(fun_pong_logic)
+fun_numbers_state = state_machine.add_state(fun_numbers_logic)
 settings_state = state_machine.add_state(settings_logic)
 
 while True:
