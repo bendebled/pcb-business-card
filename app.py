@@ -111,13 +111,13 @@ def fun_logic():
 
 def fun_tetris_logic():
     oled.fill(0)
-    oled.print_small_text("Press LEFT & RIGHT", 0, 15, 1, 1)
-    oled.print_small_text("for 2 seconds", 0, 25, 1, 1)
-    oled.print_small_text("to return to", 0, 35, 1, 1)
-    oled.print_small_text("main menu", 0, 45, 1, 1)
+    oled.print_small_text("Press LEFT & RIGHT", 0, 15, 1, 1, centered=True)
+    oled.print_small_text("for 2 seconds", 0, 25, 1, 1, centered=True)
+    oled.print_small_text("to return to", 0, 35, 1, 1, centered=True)
+    oled.print_small_text("main menu", 0, 45, 1, 1, centered=True)
     oled.show()
     time.sleep(3)
-    tetris = TetrisApp(oled, buttons)
+    tetris = Tetris(oled, buttons)
     asyncio.new_event_loop().run_until_complete(asyncio.gather(check_left_and_right_for_exit(tetris, "Thanks for playing!"), start_state(tetris)))
 
 def fun_pong_logic():

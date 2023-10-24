@@ -13,11 +13,11 @@ class WebServer:
     def display_oled_webserver(self, connected):
         self.display.fill(0)
         self.display.display_menu_header()
-        self.display.print_small_text(str("Please connect to"), 0, 15, 1, 1)
-        self.display.print_small_text(str("SSID \"bendebled\""), 0, 25, 1, 1)
-        self.display.print_small_text(str("and go to"), 0, 35, 1, 1)
-        self.display.print_small_text(str("http://192.168.4.1"), 0, 45, 1, 1)
-        self.display.print_small_text("creating AP" if not connected else "AP created", 0, 55, 1, 1)
+        self.display.print_small_text(str("Please connect to"), 0, 15, 1, 1, centered=True)
+        self.display.print_small_text(str("SSID \"bendebled\""), 0, 25, 1, 1, centered=True)
+        self.display.print_small_text(str("and go to"), 0, 35, 1, 1, centered=True)
+        self.display.print_small_text(str("http://192.168.4.1"), 0, 45, 1, 1, centered=True)
+        self.display.print_small_text("creating AP" if not connected else "AP created", 0, 55, 1, 1, centered=True)
         self.display.show()
 
    

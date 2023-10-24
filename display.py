@@ -105,7 +105,9 @@ class MY_SH1106_I2C(sh1106.SH1106_I2C):
         sh1106.SH1106_I2C.__init__(self, width, height, i2c, res, addr,
                  rotate, external_vcc, delay)
 
-    def print_small_text(self, text, xpos, ypos, size, color):
+    def print_small_text(self, text, xpos, ypos, size, color, centered=False):
+        if centered:
+            xpos = int((128 - len(text)*6)/2)
         for char in text:
             self.print_char(char, xpos, ypos, size, color)
             xpos += 6
