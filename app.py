@@ -11,9 +11,11 @@ from buttons import *
 from webserver import *
 from settings import *
 from numberfacts import *
+import temperature
 
 i2c = I2C(scl=Pin(6), sda=Pin(7), freq=400000)
-oled = MY_SH1106_I2C(128, 64, i2c, addr=0x3c, rotate=180)
+temp = temperature.Temperature(i2c)
+oled = MY_SH1106_I2C(128, 64, i2c, addr=0x3c, rotate=180, temperature=temp)
 oled.contrast(int(conf["brightness"]*2.55))
 
 buttons = Buttons()
@@ -127,7 +129,7 @@ def fun_numbers_logic():
 
 
 def settings_logic():
-    settings = Settings(oled, buttons)
+    settings = Settings(oled, buttons, temp)
     asyncio.new_event_loop().run_until_complete(asyncio.gather(check_left_for_exit(settings), start_state(settings)))
 
 

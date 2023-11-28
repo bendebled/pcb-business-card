@@ -103,9 +103,10 @@ cmap = ['00000000000000000000000000000000000', #Space
 
 class MY_SH1106_I2C(sh1106.SH1106_I2C):
     def __init__(self, width, height, i2c, res=None, addr=0x3c,
-                 rotate=0, external_vcc=False, delay=0):
+                 rotate=0, external_vcc=False, delay=0, temperature=None):
         sh1106.SH1106_I2C.__init__(self, width, height, i2c, res, addr,
                  rotate, external_vcc, delay)
+        self.temperature = temperature
 
     def print_small_text(self, text, xpos, ypos, size, color, centered=False):
         if centered:
@@ -156,5 +157,5 @@ class MY_SH1106_I2C(sh1106.SH1106_I2C):
         else:
             self.print_small_text("0487/52.44.31",1,1,1,0)
         
-        self.print_small_text("22",128-4*6+2,1,1,0)
+        self.print_small_text(str(int(self.temperature.read_temp())),128-4*6+2,1,1,0)
         self.print_small_text("°C",128-2*6,1,1,0)

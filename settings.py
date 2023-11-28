@@ -4,9 +4,10 @@ from config import conf
 
 class Settings: 
 
-    def __init__(self, display, buttons):
+    def __init__(self, display, buttons, temp):
         self.display = display
         self.buttons = buttons
+        self.temp = temp
         self.menu_pos = 0
         self.running = False
    
