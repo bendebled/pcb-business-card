@@ -178,3 +178,21 @@ Note on WS2812: https://lowpowerlab.com/forum/general-topics/ws2812b-rgb-led-mea
 ## Conclusion
 
 Long life to the ESP32-C3!
+
+
+
+## current analysis
+
+ltc plugged in & q1 plugged in: 44uA in deepsleep
+
+ltc unplugged & q1 plugged in: 7.5uA
+
+ltc plugged on vbus & q1 plugged in: 7.8uA
+
+ltc unplugged. q1 plugged. R5 & R6 plugged with gnd shorted with gnd_on_off : 45uA
+
+me6211 plugged on vsys & q1 unplugged, R5 & R6 unplugged: 77uA
+
+0.608v -> 3.725v
+
+measured 
