@@ -51,19 +51,29 @@ class Settings:
                         time.sleep(0.1) # avoid entering in the previous menu because the left click is still detected
                         break
             if self.menu_pos == 1 and self.buttons.is_right_pressed():
-                buzzer_menu_pos = 0 if conf["buzzer"] else 1
+                buzzer_menu_pos = 0
+                if conf["buzzer"] == "Low":
+                    buzzer_menu_pos = 1
+                elif conf["buzzer"] == "High":
+                    buzzer_menu_pos = 2
                 while True:
                     self.display.fill(0)
                     self.display.display_menu_header()
-                    self.display.display_menu_entry("On", 0, buzzer_menu_pos)
-                    self.display.display_menu_entry("Off", 1, buzzer_menu_pos)
+                    self.display.display_menu_entry("Off", 0, buzzer_menu_pos)
+                    self.display.display_menu_entry("Low", 1, buzzer_menu_pos)
+                    self.display.display_menu_entry("High", 2, buzzer_menu_pos)
                     self.display.show()
-                    buzzer_menu_pos = self.buttons.manage_up_down_values(buzzer_menu_pos, 0, 1)
+                    buzzer_menu_pos = self.buttons.manage_up_down_values(buzzer_menu_pos, 0, 2)
                     if self.buttons.is_left_pressed():
-                        conf["buzzer"] = True if buzzer_menu_pos == 0 else False
+                        if buzzer_menu_pos == 0:
+                            conf["buzzer"] = "Off"
+                        elif buzzer_menu_pos == 1:
+                            conf["buzzer"] = "Low"
+                        elif buzzer_menu_pos == 2:
+                            conf["buzzer"] = "High"
                         self.__save_conf_to_flash()
                         time.sleep(0.1) # avoid entering in the previous menu because the left click is still detected
                         break
 
             self.menu_pos = self.buttons.manage_up_down_values(self.menu_pos, 0, 8)
-            await asyncio.sleep(0.001)
+            await asyncio.sleep(0)
