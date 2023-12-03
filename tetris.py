@@ -26,6 +26,7 @@
 from random import randrange as rand
 import asyncio
 import time
+import music
 
 cell_size = 2
 cols =      15
@@ -174,6 +175,7 @@ class Tetris(object):
             self.gameover = False
 
     def stop(self):
+        music.stop()
         self.running = False
 
     async def run(self):
@@ -216,5 +218,6 @@ class Tetris(object):
             else:    
                 if tick % max((4-self.level), 1) == 0:
                     self.drop(False)
+            music.tick(tick)
             tick += 1
             await asyncio.sleep(0)
