@@ -18,6 +18,7 @@ def enable_peripherals(enabled):
     temperature sensors, WS2812B and battery percentage sensor"""
     p = Pin(4, Pin.OUT)
     p.value(1 if enabled else 0)
+
 enable_peripherals(True)
 i2c = I2C(scl=Pin(6), sda=Pin(7), freq=400000)
 temp = temperature.Temperature(i2c)

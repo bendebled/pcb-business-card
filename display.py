@@ -1,5 +1,6 @@
 import sh1106
 import time
+from machine import Pin, ADC
 
 cmap = ['00000000000000000000000000000000000', #Space
         '00100001000010000100001000000000100', #!
@@ -144,18 +145,49 @@ class MY_SH1106_I2C(sh1106.SH1106_I2C):
         y_pos = 15 + pos*10
         self.text(txt, x_pos, y_pos)
 
+    def read_battery_voltage(self):
+        p = Pin(5, Pin.IN)
+        adc = ADC(p)
+        v = int(adc.read_uv()/1000)
+        return v if v > 25 else 0
+    
+    def display_batt(self, x, bars):
+        self.rect(x, 2, 4, 6, 0)
+        self.line(x+1,1,x+2,1,0)
+        if bars > 0:
+            self.line(x,6,x+3,6,0)
+        if bars > 1:
+            self.line(x,5,x+3,5,0)
+        if bars > 2:
+            self.line(x,4,x+3,4,0)
+        if bars > 3:
+            self.line(x,3,x+3,3,0)
+
     def display_menu_header(self):
         self.fill_rect(0,0,128,9,1)
 
         t = (int(time.time()/5)) % 4
         if t == 0:
             self.print_small_text(str("Benoit DEBLED"), 1, 1, 1, 0)
+            ms = int((time.time_ns()/7500000)%500)
+            v = self.read_battery_voltage()
+            if v == 0:
+                bars = int(ms/100)
+            else:
+                bars = int(v/200) #TODO: empirical study to determine numbers of bars
+            self.display_batt(123,bars) 
+            self.print_small_text(str(self.read_battery_voltage()), 90, 1, 1, 0)
         elif t == 1:
             self.print_small_text(str("www.debled.com"), 1, 1,1,0)
+            ms = int((time.time_ns()/1000000)%1000)
+            bars = int(ms/200)
+            self.display_batt(120,bars)  
         elif t == 2:
             self.print_small_text("benoit@debled.com",1,1,1,0)
+            self.print_small_text(str(int(self.temperature.read_temp())),128-4*6+2,1,1,0)
+            self.print_small_text("°C",128-2*6,1,1,0)
         else:
             self.print_small_text("0487/52.44.31",1,1,1,0)
+            self.print_small_text(str(int(self.temperature.read_temp())),128-4*6+2,1,1,0)
+            self.print_small_text("°C",128-2*6,1,1,0)
         
-        self.print_small_text(str(int(self.temperature.read_temp())),128-4*6+2,1,1,0)
-        self.print_small_text("°C",128-2*6,1,1,0)
