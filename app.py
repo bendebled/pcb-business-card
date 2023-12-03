@@ -13,6 +13,12 @@ from settings import *
 from numberfacts import *
 import temperature
 
+def enable_peripherals(enabled):
+    """This function allows one to enable power to the screen, 
+    temperature sensors, WS2812B and battery percentage sensor"""
+    p = Pin(4, Pin.OUT)
+    p.value(1 if enabled else 0)
+enable_peripherals(True)
 i2c = I2C(scl=Pin(6), sda=Pin(7), freq=400000)
 temp = temperature.Temperature(i2c)
 oled = MY_SH1106_I2C(128, 64, i2c, addr=0x3c, rotate=180, temperature=temp)
