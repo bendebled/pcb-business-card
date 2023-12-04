@@ -1,7 +1,7 @@
 import asyncio
 import network
 from microdot_asyncio import Microdot, send_file
-
+import music
 
 class WebServer: 
 
@@ -41,7 +41,20 @@ class WebServer:
 
         @self.app.route('/')
         async def index(request):
-            return 'Hello, world!'
+            return send_file('index.html')
+        
+        @self.app.route('/static/<path:path>')
+        def static(request, path):
+            if '..' in path:
+                return 'Not found', 404
+            if path.endswith(".svg"):
+                return send_file('static/' + path, max_age=86400, content_type="image/svg+xml")
+            else:
+                return send_file('static/' + path, max_age=86400)
+        
+        @self.app.route('/dev/buzzer/<freq>')
+        async def buzzer(request, freq):
+            music.set_buzzer(int(freq), 512)
         
         @self.app.route('/resume.pdf')
         def resume(request):
