@@ -26,7 +26,7 @@ class Resume:
             elif self.menu_pos == 1:
                 self.display.text(str("Experiences"), 0, 0)
                 self.display.print_small_text(str("HMS - Jun 2018 - now"), 0, 15,1, 1)
-                self.display.print_small_text(str("Developping embedded"), 0, 25,1, 1)
+                self.display.print_small_text(str("Developing embedded"), 0, 25,1, 1)
                 self.display.print_small_text(str("industrial routers"), 0, 35,1, 1)
                 self.display.print_small_text(str("Tech: C, Rust, Yocto,"), 0, 45, 1, 1)
                 self.display.print_small_text(str("u-boot, kernel,"), 0, 55,1, 1)
