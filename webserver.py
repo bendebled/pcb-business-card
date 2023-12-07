@@ -2,6 +2,8 @@ import asyncio
 import network
 from microdot_asyncio import Microdot, send_file
 import music
+import neopixel, machine
+import ubinascii
 
 class WebServer: 
 
@@ -39,6 +41,8 @@ class WebServer:
         print(self.ap.ifconfig())
         self.app = Microdot()
 
+        np = neopixel.NeoPixel(machine.Pin(20), 4)
+
         @self.app.route('/')
         async def index(request):
             return send_file('index.html')
@@ -55,6 +59,15 @@ class WebServer:
         @self.app.route('/dev/buzzer/<freq>')
         async def buzzer(request, freq):
             music.set_buzzer(int(freq), 512)
+
+        @self.app.route('/dev/led/<led_id>/<hex>')
+        async def led(request, led_id, hex):
+            led_id = int(led_id)
+            if led_id < 0 or led_id > 4:
+                return 'led_id must be between 1 and 4', 403
+            bytesValues = ubinascii.unhexlify(hex)
+            np[led_id-1] = (bytesValues[0],bytesValues[1],bytesValues[2])
+            np.write()
         
         @self.app.route('/resume.pdf')
         def resume(request):
