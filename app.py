@@ -1,5 +1,4 @@
-from machine import Pin, I2C, PWM, Timer, deepsleep, wake_reason
-import esp32
+from machine import Pin, I2C, PWM, Timer
 from display import *
 import time
 from statemachine import *
@@ -13,12 +12,7 @@ from webserver import *
 from settings import *
 from numberfacts import *
 import temperature
-
-def enable_peripherals(enabled):
-    """This function allows one to enable power to the screen, 
-    temperature sensors, WS2812B and battery percentage sensor"""
-    p = Pin(4, Pin.OUT)
-    p.value(1 if enabled else 0)
+from power_mgmt import *
 
 def beep(t):
     p = Pin(10, Pin.OUT)
@@ -26,19 +20,8 @@ def beep(t):
     time.sleep(0.1)
     pwm.deinit()
 
-def enter_deep_sleep():
-    ipin0 = Pin(0, Pin.IN, Pin.PULL_UP, hold=True)
-    ipin1 = Pin(1, Pin.IN, Pin.PULL_UP, hold=True)
-    ipin2 = Pin(2, Pin.IN, Pin.PULL_UP, hold=True)
-    ipin3 = Pin(3, Pin.IN, Pin.PULL_UP, hold=True)
-    esp32.wake_on_ext1(pins=(ipin0,ipin1,ipin2,ipin3), level=esp32.WAKEUP_ALL_LOW)
-    enable_peripherals(False)
-    deepsleep()
-
-def check_low_voltage(_):
-    #enter_deep_sleep()
-    #TODO
-    pass
+def background_loop(_):
+    power.go_to_sleep_if_needed()
 
 def state0_logic():
     global main_menu_pos
@@ -100,8 +83,11 @@ def resume_logic():
     asyncio.new_event_loop().run_until_complete(asyncio.gather(check_left_for_exit(resume), start_state(resume)))
 
 def web_server_logic():
+    global allow_inactivity
+    power.allow_inactivity = True
     webserver = WebServer(oled)
     asyncio.new_event_loop().run_until_complete(asyncio.gather(check_left_for_exit(webserver), start_state(webserver)))
+    power.allow_inactivity = False
 
 def temp_logger_logic():
     oled.fill(0)
@@ -149,8 +135,9 @@ def settings_logic():
     asyncio.new_event_loop().run_until_complete(asyncio.gather(check_left_for_exit(settings), start_state(settings)))
 
 
-
-enable_peripherals(True)
+buttons = Buttons()
+power = PowerMgmt(buttons)
+power.enable_peripherals(True)
 time.sleep(0.5)
 
 pbuz = Pin(10, Pin.OUT)
@@ -160,8 +147,6 @@ i2c = I2C(scl=Pin(6), sda=Pin(7), freq=400000)
 temp = temperature.Temperature(i2c)
 oled = MY_SH1106_I2C(128, 64, i2c, addr=0x3c, rotate=180, temperature=temp)
 oled.contrast(int(conf["brightness"]*2.55))
-
-buttons = Buttons()
 
 state_machine = StateMachine()
 state0 = state_machine.add_state(state0_logic)
@@ -173,19 +158,12 @@ fun_tetris_state = state_machine.add_state(fun_tetris_logic)
 fun_numbers_state = state_machine.add_state(fun_numbers_logic)
 settings_state = state_machine.add_state(settings_logic)
 
+allow_inactivity = False
 main_menu_pos = 0
 fun_menu_pos = 0
 
-#if wake_reason() == 7:
-#    oled.fill(0)
-#    oled.display_menu_entry("Low Battery", 1, 0)
-#    oled.display_menu_entry("Please recharge", 2, 0)
-#    oled.show()
-#    time.sleep(2)
-#    enter_deep_sleep()
-
 tim = Timer(0)
-tim.init(period=10000, callback=check_low_voltage, mode=Timer.PERIODIC)
+tim.init(period=10000, callback=background_loop, mode=Timer.PERIODIC)
 
 while True:
     state_machine.run()

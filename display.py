@@ -1,6 +1,6 @@
 import sh1106
 import time
-from machine import Pin, ADC
+import power_mgmt
 
 cmap = ['00000000000000000000000000000000000', #Space
         '00100001000010000100001000000000100', #!
@@ -144,12 +144,6 @@ class MY_SH1106_I2C(sh1106.SH1106_I2C):
         x_pos = int((128 - len(txt)*8)/2)
         y_pos = 15 + pos*10
         self.text(txt, x_pos, y_pos)
-
-    def read_battery_voltage(self):
-        p = Pin(5, Pin.IN)
-        adc = ADC(p)
-        v = int(adc.read_uv()/1000)
-        return v if v > 25 else 0
     
     def display_batt(self, x, bars):
         self.rect(x, 2, 4, 6, 0)
@@ -170,13 +164,13 @@ class MY_SH1106_I2C(sh1106.SH1106_I2C):
         if t == 0:
             self.print_small_text(str("Benoit DEBLED"), 1, 1, 1, 0)
             ms = int((time.time_ns()/7500000)%500)
-            v = self.read_battery_voltage()
+            v = power_mgmt.read_battery_voltage()
             if v == 0:
                 bars = int(ms/100)
             else:
                 bars = int(v/200) #TODO: empirical study to determine numbers of bars
             self.display_batt(123,bars) 
-            self.print_small_text(str(self.read_battery_voltage()), 90, 1, 1, 0)
+            self.print_small_text(str(power_mgmt.read_battery_voltage()), 90, 1, 1, 0)
         elif t == 1:
             self.print_small_text(str("www.debled.com"), 1, 1,1,0)
             ms = int((time.time_ns()/1000000)%1000)
