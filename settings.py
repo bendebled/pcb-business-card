@@ -1,6 +1,7 @@
 import asyncio
 import time
 from config import conf
+import power_mgmt
 
 class Settings: 
 
@@ -28,6 +29,8 @@ class Settings:
             self.display.display_menu_header()
             self.display.display_menu_entry("Brightness", 0, self.menu_pos)
             self.display.display_menu_entry("Buzzer", 1, self.menu_pos)
+            self.display.print_small_text(str("Battery: {}mV ({})".format(power_mgmt.read_battery_voltage_in_mv(), int(power_mgmt.read_battery_voltage()))), 0, 45, 1, 1, centered=True)
+            self.display.print_small_text(str("Uptime: {}s".format(time.time())), 0, 55, 1, 1, centered=True)
             self.display.show()
 
             self.menu_pos = self.buttons.manage_up_down_values(self.menu_pos, 0, 1)

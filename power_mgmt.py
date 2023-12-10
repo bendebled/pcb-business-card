@@ -2,11 +2,17 @@ from machine import Pin, ADC, deepsleep
 import esp32
 import time
 
+R5_VALUE = 4.7
+R6_VALUE = 1
+
 def read_battery_voltage():
     p = Pin(5, Pin.IN)
     adc = ADC(p)
     v = int(adc.read_uv()/1000)
     return v if v > 25 else 0
+
+def read_battery_voltage_in_mv():
+    return int(read_battery_voltage()/(1/(R5_VALUE+R6_VALUE)))
 
 class PowerMgmt: 
 
