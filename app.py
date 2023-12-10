@@ -1,4 +1,4 @@
-from machine import Pin, I2C, PWM, Timer
+from machine import Pin, I2C, PWM, Timer,wake_reason
 from display import *
 import time
 from statemachine import *
@@ -172,6 +172,15 @@ fun_menu_pos = 0
 tim = Timer(0)
 tim.init(period=10000, callback=background_loop, mode=Timer.PERIODIC)
 
+if wake_reason() == machine.DEEPSLEEP_RESET:
+    battery_mv = power_mgmt.read_battery_voltage_in_mv()
+    if battery_mv != 0 and battery_mv < 3100:
+        oled.fill(0)
+        oled.display_menu_entry("Low Battery", 1, 0)
+        oled.display_menu_entry("Please recharge", 2, 0)
+        oled.show()
+        time.sleep(2)
+        power.enter_deep_sleep()
 i = 0
 steps = 0
 while True:
