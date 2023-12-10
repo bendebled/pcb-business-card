@@ -13,6 +13,7 @@ from settings import *
 from numberfacts import *
 import temperature
 from power_mgmt import *
+import led_effect
 
 def beep(t):
     p = Pin(10, Pin.OUT)
@@ -80,12 +81,14 @@ async def start_state(obj):
     await obj.run()
 
 def resume_logic():
+    led_effect.cancel()
     resume = Resume(oled, buttons)
     asyncio.new_event_loop().run_until_complete(asyncio.gather(check_left_for_exit(resume), start_state(resume)))
 
 def web_server_logic():
     global allow_inactivity
     power.allow_inactivity = True
+    led_effect.cancel()
     webserver = WebServer(oled)
     asyncio.new_event_loop().run_until_complete(asyncio.gather(check_left_for_exit(webserver), start_state(webserver)))
     power.allow_inactivity = False
@@ -117,6 +120,7 @@ def fun_logic():
         state_machine.force_transition_to(state0)
 
 def fun_tetris_logic():
+    led_effect.cancel()
     oled.fill(0)
     oled.print_small_text("Press LEFT & RIGHT", 0, 15, 1, 1, centered=True)
     oled.print_small_text("for 2 seconds", 0, 25, 1, 1, centered=True)
@@ -128,14 +132,15 @@ def fun_tetris_logic():
     asyncio.new_event_loop().run_until_complete(asyncio.gather(check_left_and_right_for_exit(tetris, "Thanks for playing!"), start_state(tetris)))
 
 def fun_numbers_logic():
+    led_effect.cancel()
     numberfacts = NumberFacts(oled, buttons)
     asyncio.new_event_loop().run_until_complete(asyncio.gather(check_left_for_exit(numberfacts), start_state(numberfacts)))
 
 
 def settings_logic():
+    led_effect.cancel()
     settings = Settings(oled, buttons, temp)
     asyncio.new_event_loop().run_until_complete(asyncio.gather(check_left_for_exit(settings), start_state(settings)))
-
 
 buttons = Buttons()
 power = PowerMgmt(buttons)
@@ -167,5 +172,8 @@ fun_menu_pos = 0
 tim = Timer(0)
 tim.init(period=10000, callback=background_loop, mode=Timer.PERIODIC)
 
+i = 0
+steps = 0
 while True:
     state_machine.run()
+    led_effect.tick()
