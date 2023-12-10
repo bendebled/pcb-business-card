@@ -145,7 +145,7 @@ class MY_SH1106_I2C(sh1106.SH1106_I2C):
         y_pos = 15 + pos*10
         self.text(txt, x_pos, y_pos)
     
-    def display_batt(self, x, bars):
+    def draw_batt(self, x, bars):
         self.rect(x, 2, 4, 6, 0)
         self.line(x+1,1,x+2,1,0)
         if bars > 0:
@@ -156,6 +156,19 @@ class MY_SH1106_I2C(sh1106.SH1106_I2C):
             self.line(x,4,x+3,4,0)
         if bars > 3:
             self.line(x,3,x+3,3,0)
+    
+    def display_battery(self):
+        v = power_mgmt.read_battery_voltage()
+        if v == 0:
+            ms = int((time.time_ns()/7500000)%500)
+            bars = int(ms/100)
+        else:
+            bars = int(v/200) #TODO: empirical study to determine numbers of bars
+        self.draw_batt(123,bars) 
+
+    def display_temp(self):
+        self.print_small_text(str(int(self.temperature.read_temp())),123-4*6+2,1,1,0)
+        self.print_small_text("°C",123-2*6,1,1,0)
 
     def display_menu_header(self):
         self.fill_rect(0,0,128,9,1)
@@ -163,25 +176,17 @@ class MY_SH1106_I2C(sh1106.SH1106_I2C):
         t = (int(time.time()/5)) % 4
         if t == 0:
             self.print_small_text(str("Benoit DEBLED"), 1, 1, 1, 0)
-            ms = int((time.time_ns()/7500000)%500)
-            v = power_mgmt.read_battery_voltage()
-            if v == 0:
-                bars = int(ms/100)
-            else:
-                bars = int(v/200) #TODO: empirical study to determine numbers of bars
-            self.display_batt(123,bars) 
-            self.print_small_text(str(power_mgmt.read_battery_voltage()), 90, 1, 1, 0)
+            self.display_battery()
+            self.display_temp()
         elif t == 1:
             self.print_small_text(str("www.debled.com"), 1, 1,1,0)
-            ms = int((time.time_ns()/1000000)%1000)
-            bars = int(ms/200)
-            self.display_batt(120,bars)  
+            self.display_battery()
+            self.display_temp()
         elif t == 2:
             self.print_small_text("benoit@debled.com",1,1,1,0)
-            self.print_small_text(str(int(self.temperature.read_temp())),128-4*6+2,1,1,0)
-            self.print_small_text("°C",128-2*6,1,1,0)
+            self.display_battery()
         else:
             self.print_small_text("0487/52.44.31",1,1,1,0)
-            self.print_small_text(str(int(self.temperature.read_temp())),128-4*6+2,1,1,0)
-            self.print_small_text("°C",128-2*6,1,1,0)
+            self.display_battery()
+            self.display_temp()
         
