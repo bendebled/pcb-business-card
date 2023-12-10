@@ -36,6 +36,7 @@ def state0_logic():
     oled.show()
 
     main_menu_pos = buttons.manage_up_down_values(main_menu_pos, 0, 4)
+    time.sleep(0.05)
 
     if main_menu_pos == 0 and buttons.is_right_pressed():
         state_machine.force_transition_to(resume_state)
@@ -106,6 +107,7 @@ def fun_logic():
     oled.show()
 
     fun_menu_pos = buttons.manage_up_down_values(fun_menu_pos, 0, 1)
+    time.sleep(0.05)
 
     if fun_menu_pos == 0 and buttons.is_right_pressed():
         state_machine.force_transition_to(fun_tetris_state)

@@ -1,4 +1,5 @@
 import asyncio
+import time
 
 class Resume: 
 
@@ -81,5 +82,6 @@ class Resume:
                 old_resume_pos = self.menu_pos
                 self.menu_pos = self.buttons.manage_up_down_values(self.menu_pos, 0, 8)
                 if self.menu_pos != old_resume_pos:
+                    time.sleep(0.05)
                     break
-                await asyncio.sleep(0.001)
+                await asyncio.sleep(0)
