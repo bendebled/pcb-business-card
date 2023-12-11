@@ -29,13 +29,13 @@ class Resume:
                 self.display.print_small_text(str("HMS - Jun 2018 - now"), 0, 15,1, 1)
                 self.display.print_small_text(str("Developing embedded"), 0, 25,1, 1)
                 self.display.print_small_text(str("industrial routers"), 0, 35,1, 1)
-                self.display.print_small_text(str("Tech: C, Rust, Yocto,"), 0, 45, 1, 1)
-                self.display.print_small_text(str("u-boot, kernel,"), 0, 55,1, 1)
+                self.display.print_small_text(str("Tech: C, Rust, Python"), 0, 45, 1, 1)
+                self.display.print_small_text(str("yocto,u-boot,kernel,"), 0, 55,1, 1)
             elif self.menu_pos == 2:
                 self.display.print_small_text(str("drivers, docker,"), 0, 0,1, 1)
                 self.display.print_small_text(str("modem-manager,"), 0, 10,1, 1)
-                self.display.print_small_text(str("UTF-8, UCS-2"), 0, 20,1, 1)
-                self.display.print_small_text(str(""), 0, 55, 1, 1)
+                self.display.print_small_text(str("UTF-8, UCS-2,"), 0, 20,1, 1)
+                self.display.print_small_text(str("lead dev"), 0, 30, 1, 1)
             elif self.menu_pos == 3:
                 self.display.print_small_text(str("Drooney-sept-nov '16"), 0, 0,1, 1)
                 self.display.print_small_text(str("Conception of LoRa"), 0, 10,1, 1)
@@ -48,6 +48,8 @@ class Resume:
                 self.display.print_small_text(str("Home automation"), 0, 15,1, 1)
                 self.display.print_small_text(str("Alarm clock"), 0, 25,1, 1)
                 self.display.print_small_text(str("Quadcopters"), 0, 35, 1, 1)
+                self.display.print_small_text(str("Light System"), 0, 45, 1, 1)
+                self.display.print_small_text(str("snapClassify"), 0, 55, 1, 1)
             elif self.menu_pos == 5:
                 self.display.text(str("Distinctions"), 0, 0)
                 self.display.print_small_text(str("Hackathons:"), 0, 15,1, 1)
