@@ -1,6 +1,7 @@
 from machine import Pin, ADC, deepsleep
 import esp32
 import time
+import led_effect
 
 R5_VALUE = 4.7
 R6_VALUE = 1
@@ -32,6 +33,7 @@ class PowerMgmt:
         ipin2 = Pin(2, Pin.IN, Pin.PULL_UP, hold=True)
         ipin3 = Pin(3, Pin.IN, Pin.PULL_UP, hold=True)
         esp32.wake_on_ext1(pins=(ipin0,ipin1,ipin2,ipin3), level=esp32.WAKEUP_ALL_LOW)
+        led_effect.cancel()
         self.enable_peripherals(False)
         deepsleep()
 

@@ -190,4 +190,5 @@ i = 0
 steps = 0
 while True:
     state_machine.run()
-    led_effect.tick()
+    if time.time() < 20:
+        led_effect.tick()
