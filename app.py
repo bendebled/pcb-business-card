@@ -145,15 +145,12 @@ def settings_logic():
 buttons = Buttons()
 power = PowerMgmt(buttons)
 power.enable_peripherals(True)
-time.sleep(0.5)
+time.sleep(0.2)
 
 pbuz = Pin(10, Pin.OUT)
 pbuz.value(0)
 
-i2c = I2C(scl=Pin(6), sda=Pin(7), freq=400000)
-temp = temperature.Temperature(i2c)
-oled = MY_SH1106_I2C(128, 64, i2c, addr=0x3c, rotate=180, temperature=temp)
-oled.contrast(int(conf["brightness"]*2.55))
+
 
 state_machine = StateMachine()
 state0 = state_machine.add_state(state0_logic)
@@ -169,8 +166,7 @@ allow_inactivity = False
 main_menu_pos = 0
 fun_menu_pos = 0
 
-tim = Timer(0)
-tim.init(period=10000, callback=background_loop, mode=Timer.PERIODIC)
+
 
 if wake_reason() == machine.DEEPSLEEP_RESET:
     battery_mv = power_mgmt.read_battery_voltage_in_mv()
@@ -181,6 +177,15 @@ if wake_reason() == machine.DEEPSLEEP_RESET:
         oled.show()
         time.sleep(2)
         power.enter_deep_sleep()
+
+i2c = I2C(scl=Pin(6), sda=Pin(7), freq=400000)
+temp = temperature.Temperature(i2c)
+oled = MY_SH1106_I2C(128, 64, i2c, addr=0x3c, rotate=180, temperature=temp)
+oled.contrast(int(conf["brightness"]*2.55))
+
+tim = Timer(0)
+tim.init(period=10000, callback=background_loop, mode=Timer.PERIODIC)
+
 i = 0
 steps = 0
 while True:
