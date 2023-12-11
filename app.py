@@ -31,7 +31,7 @@ def state0_logic():
     oled.display_menu_header()
     oled.display_menu_entry("My Resume", 0, main_menu_pos)
     oled.display_menu_entry("Web Server", 1, main_menu_pos)
-    oled.display_menu_entry("Temp Logger", 2, main_menu_pos)
+    oled.display_menu_entry("Wifi Scanner", 2, main_menu_pos)
     oled.display_menu_entry("Fun", 3, main_menu_pos)
     oled.display_menu_entry("Settings", 4, main_menu_pos)
     oled.show()
@@ -94,11 +94,44 @@ def web_server_logic():
     power.allow_inactivity = False
 
 def temp_logger_logic():
+    global scan_menu_pos
+    led_effect.cancel()
     oled.fill(0)
-    oled.text(str("temp logger"), 10, 35)
+    oled.print_small_text("Scanning...", 0, 15, 1, 1, centered=True)
+    oled.print_small_text("Press LEFT", 0, 30, 1, 1, centered=True)
+    oled.print_small_text("to exit", 0, 40, 1, 1, centered=True)
     oled.show()
-    if buttons.is_left_pressed():
-        state_machine.force_transition_to(state0)
+    nic = network.WLAN(network.STA_IF)
+    nic.active(True)
+    s = nic.scan()
+    number_of_pages = len(s)
+    while True:
+        oled.fill(0)
+        el0 = s[scan_menu_pos]
+        oled.print_small_text(el0[0].decode("utf-8"), 0, 0, 1, 1, centered=True)
+        oled.print_small_text("Channel: {}".format(el0[2]), 0, 10, 1, 1, centered=True)
+        oled.print_small_text("RSSI: {}".format(el0[3]), 0, 20, 1, 1, centered=True)
+        sec = el0[4]
+        security = None
+        if sec == 0:
+            security = "OPEN"
+        elif sec == 1:
+            security = "WEP"
+        elif sec == 2:
+            security = "WPA-PSK"
+        elif sec == 3:
+            security = "WPA2-PSK"
+        elif sec == 4:
+            security = "WPA/WPA2-PSK"
+        oled.print_small_text("Security: {}".format(security), 0, 30, 1, 1, centered=True)
+        oled.print_small_text("page {}/{}".format(scan_menu_pos+1, number_of_pages), 0, 50, 1, 1)
+        oled.show()
+        scan_menu_pos = buttons.manage_up_down_values(scan_menu_pos, 0, number_of_pages-1)
+        
+        if buttons.is_left_pressed():
+            nic.active(False)
+            state_machine.force_transition_to(state0)
+            break
 
 def fun_logic():
     global fun_menu_pos
@@ -165,7 +198,7 @@ settings_state = state_machine.add_state(settings_logic)
 allow_inactivity = False
 main_menu_pos = 0
 fun_menu_pos = 0
-
+scan_menu_pos = 0
 
 
 if wake_reason() == machine.DEEPSLEEP_RESET:
