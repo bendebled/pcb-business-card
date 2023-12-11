@@ -69,8 +69,8 @@ class WebServer:
             np[led_id-1] = (bytesValues[0],bytesValues[1],bytesValues[2])
             np.write()
         
-        @self.app.route('/resume.pdf')
+        @self.app.route('/benoit-debled-resume.pdf')
         def resume(request):
-            return send_file('resume.pdf', content_type="application/pdf")
+            return send_file('benoit-debled-resume.pdf', content_type="application/pdf")
         
         await self.app.start_server(port=80, debug=True)
