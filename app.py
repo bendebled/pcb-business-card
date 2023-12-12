@@ -200,21 +200,20 @@ main_menu_pos = 0
 fun_menu_pos = 0
 scan_menu_pos = 0
 
+i2c = I2C(scl=Pin(6), sda=Pin(7), freq=400000)
+temp = temperature.Temperature(i2c)
+oled = MY_SH1106_I2C(128, 64, i2c, addr=0x3c, rotate=180, temperature=temp)
+oled.contrast(int(conf["brightness"]*2.55))
 
-if wake_reason() == machine.DEEPSLEEP_RESET:
+if wake_reason() == 7:
     battery_mv = power_mgmt.read_battery_voltage_in_mv()
-    if battery_mv != 0 and battery_mv < 3100:
+    if battery_mv != 0 and battery_mv < 3600:
         oled.fill(0)
         oled.display_menu_entry("Low Battery", 1, 0)
         oled.display_menu_entry("Please recharge", 2, 0)
         oled.show()
         time.sleep(2)
         power.enter_deep_sleep()
-
-i2c = I2C(scl=Pin(6), sda=Pin(7), freq=400000)
-temp = temperature.Temperature(i2c)
-oled = MY_SH1106_I2C(128, 64, i2c, addr=0x3c, rotate=180, temperature=temp)
-oled.contrast(int(conf["brightness"]*2.55))
 
 tim = Timer(0)
 tim.init(period=10000, callback=background_loop, mode=Timer.PERIODIC)

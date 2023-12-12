@@ -41,7 +41,7 @@ class PowerMgmt:
         inactivity_time = time.time() - self.buttons.last_pressed
         allowed_inactivity_time = 300 if self.allow_inactivity else 15
         if read_battery_voltage() == 0:
-            allowed_inactivity_time = 3600
+            allowed_inactivity_time = 300
         if(inactivity_time > allowed_inactivity_time):
             self.enter_deep_sleep()
 

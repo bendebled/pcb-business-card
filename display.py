@@ -158,12 +158,19 @@ class MY_SH1106_I2C(sh1106.SH1106_I2C):
             self.line(x,3,x+3,3,0)
     
     def display_battery(self):
-        v = power_mgmt.read_battery_voltage()
+        v = power_mgmt.read_battery_voltage_in_mv()
         if v == 0:
             ms = int((time.time_ns()/7500000)%500)
             bars = int(ms/100)
         else:
-            bars = int(v/200) #TODO: empirical study to determine numbers of bars
+            if v > 3950:
+                bars = 4
+            elif v <= 3950 and v >= 3800:
+                bars = 3
+            elif v < 3800 and v >= 3600:
+                bars = 2
+            else:
+                bars = 1
         self.draw_batt(123,bars) 
 
     def display_temp(self):
