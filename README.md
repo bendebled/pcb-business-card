@@ -2,6 +2,8 @@
 
 Paper business cards have long been a staple of professional networking, but in today's digital age, they can feel a bit outdated. PCB business card is a more dynamic and innovative alternative that showcases your creativity and technical prowess. While paper business cards are traditional and functional, PCB business cards are undeniably more intriguing, making a lasting impression with their unique blend of design and functionality.
 
+![business-card](doc/business-card.jpg)
+
 ## Requirements 
 
 Here are the main requirements and features:
@@ -38,3 +40,65 @@ This repository contains different folders:
 
 * pcb: contains the different designed PCB using Altium Designer
 * src: contains the MicronPython code
+
+## How to make the hardware
+
+* Please produce the 3 different PCB needed for this project: the mainboard, the middle and the top. As the LIR2450 battery is 5mm high, you will need 4 PCB of 1.6mm thick for the middle PCB. There are 3 zip files containing the gerber files; one for each PCB.
+* Unsolder the regulator on the ESP32 module. This can be done easily with a hot air gun.
+* Solder all components on the mainboard.
+* Either connect all PCB by soldering a pin on each visible via or by gluing them together with contact glue. If you choose the glue option, you can still use the via to guide the PCB correctly on top of each other.
+
+## How to deploy the firmware
+
+See [doc/firmware.md](doc/firmware.md) for more details
+
+## How to deploy the micropython app
+
+You can list, get and upload new python file using ampy. To install ampy, please run the following command:
+
+```bash
+pip3 install adafruit-ampy
+```
+
+To list files, you can run:
+
+```
+ampy -p /dev/ttyACM0 ls
+```
+
+You should get the following results:
+
+```
+/app_secrets.py
+/benoit-debled-resume.pdf
+/boot.py
+/buttons.py
+/colorsys.py
+/config.py
+/display.py
+/ds1621.py
+/index.html
+/led_effect.py
+/main.py
+/menu.py
+/microdot.mpy
+/microdot_asyncio.mpy
+/music.py
+/numberfacts.py
+/pong.py
+/power_mgmt.py
+/resume.py
+/settings.py
+/sh1106.py
+/statemachine.py
+/static
+/temperature.py
+/tetris.py
+/webserver.py
+```
+
+To deploy the files, run `upload_all.sh`
+
+## Yet to test:
+
+* Small PCB were glued vertically between LED lights to avoid any light bleed. However, LED pipes should be placed. A cheap solution to test is to pour transparent silicone inside the fours LED holes.
